@@ -1,0 +1,229 @@
+/* Tận dụng tone màu và font từ bản cũ của cậu nhưng nâng cấp cấu trúc */
+.admin-setup-container {
+  max-width: 1200px; /* Nới rộng ra để đủ chỗ cho 2 cột */
+  margin: 20px auto;
+  padding: 30px;
+  background: #f5f7fb; /* Giữ màu nền cũ của cậu */
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.setup-header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 20px;
+}
+
+.setup-header h1 {
+  color: #333;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* BỐ CỤC CHÍNH: Chia 2 cột xịn xò */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr; 
+  gap: 25px;
+  align-items: start;
+}
+
+/* CỘT TRÁI: DANH SÁCH */
+.user-list-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.users-table-wrapper {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th {
+  text-align: left;
+  padding: 15px;
+  background: #f8f9fa;
+  color: #555;
+  font-weight: 600;
+  border-bottom: 2px solid #edf2f7;
+}
+
+.users-table td {
+  padding: 15px;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+}
+
+/* Hiệu ứng khi chọn User */
+.users-table tr {
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.users-table tr:hover {
+  background-color: #f1f5f9;
+}
+
+.users-table tr.active {
+  background-color: #ebf4ff;
+  border-left: 4px solid #1976d2;
+}
+
+/* Cell thông tin User */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-cell img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+}
+
+.user-cell .name {
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.user-cell .email {
+  font-size: 12px;
+  color: #777;
+  margin: 0;
+}
+
+/* Badge Role (Lấy lại màu của cậu) */
+.role-badge {
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.role-badge.admin { background: #e3f2fd; color: #1976d2; }
+.role-badge.user { background: #f3e5f5; color: #7b1fa2; }
+
+/* CỘT PHẢI: FORM CHỈNH SỬA */
+.permissions-edit-section {
+  position: sticky; /* Cuộn trang thì cột này vẫn đứng yên */
+  top: 20px;
+}
+
+.edit-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-top: 5px solid #1976d2;
+}
+
+.edit-card h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.role-toggle {
+  margin-bottom: 25px;
+}
+
+.role-toggle label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.role-toggle select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* Grid các ô Checkbox quyền */
+.permissions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.perm-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.perm-item:hover {
+  border-color: #1976d2;
+  background: #fff;
+}
+
+.perm-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.perm-item label {
+  cursor: pointer;
+  font-size: 14px;
+  color: #444;
+}
+
+/* Nút bấm thao tác */
+.btn-edit {
+  padding: 8px 16px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.3s;
+}
+
+.btn-edit:hover {
+  background: #1565c0;
+}
+
+/* Trạng thái trống */
+.empty-state {
+  text-align: center;
+  padding: 50px;
+  background: white;
+  border-radius: 12px;
+  color: #999;
+  border: 2px dashed #ddd;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+  .permissions-edit-section {
+    position: static;
+  }
+}

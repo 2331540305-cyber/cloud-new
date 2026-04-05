@@ -1,0 +1,94 @@
+.members-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #64748b;
+}
+
+.header-right-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #1e293b;
+}
+
+.header-title h1 {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.online-count {
+  color: #22c55e; /* Màu xanh lá như trong ảnh */
+  font-weight: 500;
+  margin-bottom: 30px;
+}
+
+/* Style cho từng dòng item giống ảnh */
+.member-item {
+  background: #1e1e2d; /* Màu nền tối đậm */
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.member-left-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px; /* Hơi vuông như ảnh */
+  object-fit: cover;
+}
+
+.member-info h4 {
+  color: #ffffff;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.member-info .sub-text {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* Chấm xanh bên phải */
+.dot.online {
+  width: 10px;
+  height: 10px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.you-badge {
+  color: #6366f1;
+  font-size: 0.8rem;
+}
