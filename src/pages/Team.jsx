@@ -31,12 +31,10 @@ export default function Team() {
   const editorRef = useRef(null);
   const decorationsRef = useRef([]);
 
-  // Hàm định dạng thời gian "X phút trước"
   const formatTime = (ts) => {
     if (!ts) return "Đang lưu...";
     let date = new Date(ts);
     if (isNaN(date.getTime())) return "Đang lưu...";
-    
     const now = new Date();
     const diff = Math.floor((now - date) / 1000);
     if (diff < 5) return "Vừa xong";
@@ -65,11 +63,11 @@ export default function Team() {
     return () => clearTimeout(timeout);
   }, [code]);
 
-  // Logic Auto-save Lịch sử (5 giây/lần nếu có thay đổi)
+  // Auto-save Lịch sử
   useEffect(() => {
     if (!selectedFile?.id || !code || !user) return;
     const autoSaveInterval = setInterval(async () => {
-      if (code.trim() !== lastSavedCode.current.trim()) {
+      if (code.trim() !== lastSavedCode.current.trim() && code.trim() !== '') {
         try {
           const historyRef = collection(db, 'team_projects', selectedFile.id, 'history');
           await addDoc(historyRef, {
@@ -81,11 +79,11 @@ export default function Team() {
           if (isHistoryOpen) loadHistory(); 
         } catch (e) { console.error("Lỗi Auto-save:", e); }
       }
-    }, 5000);
+    }, 10000);
     return () => clearInterval(autoSaveInterval);
   }, [code, selectedFile?.id, user, isHistoryOpen]);
 
-  // Lắng nghe Code & Chat từ RTDB
+  // Đồng bộ Code & Chat
   useEffect(() => {
     if (!selectedFile?.id) return;
     const codeRef = ref(rtdb, `team_code/${selectedFile.id}`);
@@ -104,7 +102,7 @@ export default function Team() {
     return () => { off(codeRef); off(chatRef); };
   }, [selectedFile?.id]);
 
-  // Hiển thị con trỏ của người khác (Remote Cursor)
+  // LOGIC HIỆN THỊ CON TRỎ NGƯỜI KHÁC (FIXED)
   useEffect(() => {
     if (!editorRef.current || !onlineUsers || !user || !selectedFile) return;
 
@@ -116,12 +114,12 @@ export default function Team() {
             startLineNumber: data.cursor.lineNumber,
             startColumn: data.cursor.column,
             endLineNumber: data.cursor.lineNumber,
-            endColumn: data.cursor.column + 1
+            endColumn: data.cursor.column // Column trùng nhau để tạo vạch kẻ dọc
           },
           options: {
-            className: 'remote-cursor',
-            hoverMessage: { value: `Đang gõ: ${data.name}` },
-            beforeContentClassName: 'remote-cursor-label',
+            className: 'remote-cursor-active', // Class để CSS xử lý nhấp nháy
+            hoverMessage: { value: `Đang gõ: ${data.name}` }, 
+            isWholeLine: false,
           }
         });
       }
@@ -194,13 +192,12 @@ export default function Team() {
 
   const setupPresence = (u) => {
     const pRef = ref(rtdb, `presence/${u.uid}`);
-    set(pRef, { name: u.displayName || u.email, photo: u.photoURL });
+    set(pRef, { name: u.displayName || u.email, photo: u.photoURL, cursor: null });
     onDisconnect(pRef).remove();
   };
 
   const listenToOnlineUsers = () => onValue(ref(rtdb, 'presence'), (s) => setOnlineUsers(s.val() || {}));
 
-  // Tự động scroll chat xuống cuối
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
@@ -215,7 +212,7 @@ export default function Team() {
               <div key={f.id} className="file-card" onClick={() => setSelectedFile(f)}>
                 <FiCode size={30} color="#6366f1" />
                 <div className="file-info"><strong>{f.fileName}</strong></div>
-                <button className="btn-delete-file" onClick={(e) => { e.stopPropagation(); if(window.confirm("Xóa file này?")) { deleteDoc(doc(db, 'team_projects', f.id)); loadTeamFiles(); } }}><FiTrash2 /></button>
+                <button className="btn-delete-file" onClick={(e) => { e.stopPropagation(); if(confirm("Xóa file?")) { deleteDoc(doc(db, 'team_projects', f.id)); loadTeamFiles(); } }}><FiTrash2 /></button>
               </div>
             ))}
             <div className="file-card add-new" onClick={() => setIsCreating(true)}><FiPlus size={40} /><p>Tạo file</p></div>
@@ -249,28 +246,16 @@ export default function Team() {
               <span>{selectedFile.fileName}</span>
             </div>
             <div className="header-right">
-              {/* Hiển thị Avatar những người đang online */}
               <div className="online-avatars">
                 {Object.values(onlineUsers).map((u, i) => (
-                  <img 
-                    key={i} 
-                    src={u.photo || `https://ui-avatars.com/api/?name=${u.name}`} 
-                    className="user-avatar-mini" 
-                    title={u.name}
-                    alt="avatar" 
-                  />
+                  <img key={i} src={u.photo || `https://ui-avatars.com/api/?name=${u.name}`} className="user-avatar-mini" title={u.name} alt="avatar" />
                 ))}
               </div>
-              <button 
-                className="btn-icon" 
-                onClick={() => { setIsHistoryOpen(prev => { if (!prev) loadHistory(); return !prev; }); }}
-                title="Lịch sử bản lưu"
-              >
+              <button className="btn-icon" onClick={() => { setIsHistoryOpen(prev => { if (!prev) loadHistory(); return !prev; }); }}>
                 <FiClock color={isHistoryOpen ? "#6366f1" : "white"} />
               </button>
             </div>
           </div>
-          
           <div className="editor-wrapper" style={{ position: 'relative', flex: 1 }}>
             <Editor 
               height="100%" 
@@ -281,8 +266,6 @@ export default function Team() {
               onMount={handleEditorDidMount} 
               options={{ automaticLayout: true, minimap: { enabled: false } }} 
             />
-            
-            {/* Bảng lịch sử hiện ra khi bấm nút Clock */}
             {isHistoryOpen && (
               <div className="history-panel">
                 <div className="history-header">
@@ -292,13 +275,10 @@ export default function Team() {
                 <div className="history-list">
                   {isLoadingHistory ? <div className="empty-text">Đang tải...</div> : history.map(h => (
                     <div key={h.id} className="history-item" onClick={() => restoreVersion(h.code)}>
-                      <strong title={new Date(h.timestamp).toLocaleString()}>
-                        {formatTime(h.timestamp)}
-                      </strong>
+                      <strong>{formatTime(h.timestamp)}</strong>
                       <small>Sửa bởi: {h.savedBy?.split('@')[0]}</small>
                     </div>
                   ))}
-                  {!isLoadingHistory && history.length === 0 && <div className="empty-text">Chưa có bản lưu.</div>}
                 </div>
               </div>
             )}
@@ -310,7 +290,6 @@ export default function Team() {
           <iframe srcDoc={srcDoc} title="output" sandbox="allow-scripts" frameBorder="0" className="preview-iframe" />
         </div>
 
-        {/* Chat Nổi (Floating Chat) */}
         <div className={`floating-chat ${isChatOpen ? 'open' : ''}`}>
           {isChatOpen && (
             <div className="chat-window">
@@ -318,29 +297,17 @@ export default function Team() {
               <div className="chat-messages" ref={scrollRef}>
                 {messages.map((m, i) => (
                   <div key={i} className={`msg ${m.user === (user?.displayName || user?.email) ? 'mine' : ''}`}>
-                    <small>{m.user?.split('@')[0]}</small>
-                    <p>{m.text}</p>
+                    <small>{m.user?.split('@')[0]}</small><p>{m.text}</p>
                   </div>
                 ))}
               </div>
-              <form className="chat-input" onSubmit={(e) => { 
-                e.preventDefault(); 
-                if(!inputMsg.trim()) return; 
-                push(ref(rtdb, `team_chats/${selectedFile.id}`), { 
-                  user: user.displayName || user.email, 
-                  text: inputMsg, 
-                  timestamp: serverTimestamp() 
-                }); 
-                setInputMsg(''); 
-              }}>
+              <form className="chat-input" onSubmit={(e) => { e.preventDefault(); if(!inputMsg.trim()) return; push(ref(rtdb, `team_chats/${selectedFile.id}`), { user: user.displayName || user.email, text: inputMsg, timestamp: serverTimestamp() }); setInputMsg(''); }}>
                 <input value={inputMsg} onChange={e => setInputMsg(e.target.value)} placeholder="Nhắn tin..." />
                 <button type="submit"><FiSend /></button>
               </form>
             </div>
           )}
-          <button className="chat-toggle" onClick={() => setIsChatOpen(!isChatOpen)}>
-            {isChatOpen ? <FiX /> : <FiMessageSquare />}
-          </button>
+          <button className="chat-toggle" onClick={() => setIsChatOpen(!isChatOpen)}>{isChatOpen ? <FiX /> : <FiMessageSquare />}</button>
         </div>
       </div>
     </Layout>
